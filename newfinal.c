@@ -39,12 +39,12 @@ double ForintToEuro(double amount){       //* Function to convert amount of mone
 void create(char x[], double y, char z[], char c[] , struct node **temp );     //* function to create a node out of the node struct data and storing it inside a pointer
 void deleterecord(struct node *ptr);                                 
 struct node *readnext(struct node *ptr, FILE *fptr);             //* function to read next node 
-void save_income(struct node *ptr);                //*function to save income record
+void save_income(struct node *ptr , FILE *fptr);                //*function to save income record
 struct node *readincome(struct node *ptr, FILE *fptr);         //*function to read income record
-void save_expense(struct node *ptr);             //*function to save expense record
+void save_expense(struct node *ptr , FILE *fptr);             //*function to save expense record
 struct node *readexpense(struct node *ptr , FILE *fptr);      //*function to read expense record
-void display_record(int n);                   //*function to display income and expense record
-void save_record(struct record *point);              //*function to save the menu record record (roral income , total expense, current balance)
+void display_record(int n , FILE* fptr);                   //*function to display income and expense record
+void save_record(struct record *point , FILE *fptr);              //*function to save the menu record record (roral income , total expense, current balance)
 struct record *read_record(struct record *ptr , FILE* fptr);              //*function to read the record of the above function
 
     //* defining all the functions, for categories record saving, reading, searching and creating.
@@ -52,51 +52,14 @@ bool search(struct category* ptr2, char x[10]);       //*function search name of
 
 void New_Category();                                                             //*function to create a new category (node)
 void CreateCatList(char x[] ,struct category **temp);                           //*function to create a linked list
-void Save_INCOME_Category(struct category *ptr);                                //*function to save income categories
+void Save_INCOME_Category(struct category *ptr , FILE *fptr);
 struct category *ReadNextCat(struct category *ptr,FILE *fptr);                  //*function to read next category in list
 void DeleteInRecord(struct category *ptr);                                
 struct category *Read_INCOME_Category(struct category *ptr , FILE *fptr);              //*function to read income categories
-void Save_EXPENSE_Category(struct category *ptr);                         //*function to save expense categories
+void Save_EXPENSE_Category(struct category *ptr , FILE *fptr);                         //*function to save expense categories
 struct category *Read_EXPENSE_Category(struct category *ptr , FILE *fptr);               //*function to read expense categories
-void DisplayCategories(int n);                                           //*function to display income or expense categories
+void DisplayCategories(int n , FILE* fptr);                                           //*function to display income or expense categories
 
-/* Function to delete the entire linked list */
-void deleteList(struct node **head_ref)
-{
-   /* deref head_ref to get the real head */
-   struct node *current = *head_ref;
-   struct node *next;
- 
-   while (current != NULL)
-   {
-       next = current->next;
-       free(current);
-       current = next;
-   }
-   
-   /* deref head_ref to affect the real head back
-      in the caller. */
-   *head_ref = NULL;
-}
-
-
-void deleteCATList(struct category **head_ref)
-{
-   /* deref head_ref to get the real head */
-   struct category *current = *head_ref;
-   struct category *next;
- 
-   while (current != NULL)
-   {
-       next = current->next;
-       free(current);
-       current = next;
-   }
-   
-   /* deref head_ref to affect the real head back
-      in the caller. */
-   *head_ref = NULL;
-}
 
 void deleteLista(struct node **head)
 {
@@ -141,7 +104,8 @@ int main(){
     currencyPTR = fopen("currency.txt", "r");   //* opening the file that contains the currency data (name)
     if (currencyPTR == NULL) //* Works when the user open the program for the first time, Asks for a currency type, create a file and stores the data.
     {
-        currencyPTR = fopen("currency.txt" , "w");     
+        currencyPTR = fopen("currency.txt" , "w");  
+
         printf("************ WELCOME TO YOUR DIGITAL WALLET ************\n\n\n");
         printf("Please choose a currency: \n");
         printf("1. Euro\n");
@@ -152,38 +116,47 @@ int main(){
         {
         case 1:
             fputs("Euro", currencyPTR);
-            fclose(currencyPTR);
             strcpy(add.currency , euro);
+            fclose(currencyPTR);
+
             break;
         case 2:
             fputs("Forint" , currencyPTR);
-            fclose(currencyPTR);
             strcpy(add.currency , forint);
+            fclose(currencyPTR);
+            
         default: printf("Please choose a valid option!\n");
             break;
         }
+        currencyPTR = fopen("currency.txt", "r");
+            fgets(DisplayCoin, 10, currencyPTR);
+            fclose(currencyPTR);
+
+        
         printf("\nThe program will start in a few seconds\nPlease enter new categories first! \n");
         Sleep(8000);
       system("cls");  
     }
+    
+      fgets(DisplayCoin, 10, currencyPTR);
+      fclose(currencyPTR);
+
 
     if( (aaa = fopen("Record.bin" , "rb") ) != NULL){            //* opening the record file and saving the data into pointers
         point = read_record(point , aaa);
         current_income = point->in;
         current_expense = point->ex;
     }
-    if( (bbb =fopen("Income_record.bin" , "rb") ) != NULL){     //* opening the income record file and saving the data into a pointer
+    if( (bbb = fopen("Income_record.bin" , "rb") ) != NULL){     //* opening the income record file and saving the data into a pointer
         income = readincome(income , bbb);
     }
-    if( (ccc= fopen("Expense_record.bin" , "rb") ) != NULL){     //* opening the expense record file and saving the data into a pointer
+    if( (ccc = fopen("Expense_record.bin" , "rb") ) != NULL){     //* opening the expense record file and saving the data into a pointer
         expense = readexpense(expense , ccc);
     }
-
-    if( (ddd= fopen("Income_categories.bin","rb") ) != NULL){           //* opening the income category file and saving the data into a pointer
-      INcategories = Read_INCOME_Category(INcategories , ddd); 
+    if( (ddd = fopen("Income_categories.bin","rb") ) != NULL){           //* opening the income category file and saving the data into a pointer
+      INcategories = Read_INCOME_Category(INcategories , ddd);
     }
-
-    if( (eee =fopen("Expense_categories.bin","rb") ) != NULL){           //* opening the expense category file and saving the data into a pointer
+    if( (eee = fopen("Expense_categories.bin","rb") ) != NULL){           //* opening the expense category file and saving the data into a pointer
       EXcategories = Read_EXPENSE_Category(EXcategories , eee);
     }
 
@@ -191,12 +164,9 @@ int main(){
     char d[50];
     char day[15] , month[15] , year[15]; 
     int option;
-    
-    currencyPTR = fopen("currency.txt" , "r");
-    fgets(DisplayCoin, 10, currencyPTR);
-    fclose(currencyPTR);
-    do{               //* Run the program as long as the user did not press exit
 
+    do{               //* Run the program as long as the user did not press exit
+    
         printf("                           Digital Wallet ");
         printf("\n\n                ************************************");
         printf("\n                                                      ");
@@ -226,7 +196,8 @@ int main(){
             int cointype;
             int cat_type;
             char cat_name[15];
-            case 1:
+            
+            case 1:        //* Add new expense record
             system("cls");
             printf("************ ADD INCOME ************\n\n");   //* starting the add income function 
             printf("Enter the date(day, month, year)\n");
@@ -265,7 +236,7 @@ int main(){
 
             } 
             printf("Please choose a category: \n");
-            DisplayCategories(1);              //*printing the available income categories
+            DisplayCategories(1 , ddd);              //*printing the available income categories
             scanf("%s" , cat_name);     //* scaning the users coice into a temporary array
             system("cls");
              if((search(INcategories , cat_name)) == true){    //*checking if the desired category is avaialbe
@@ -273,22 +244,14 @@ int main(){
               printf("Category exist! saving your data...\n");   //* if so, start saving the data
               current_income += amount;
               create(d, amount, add.currency, cat_name ,&income);
-              fclose(bbb);
-              save_income(income);
+              save_income(income , bbb);
               bbb = fopen("Income_record.bin" , "rb");
-
-              point = (struct record*)malloc(sizeof(struct record));
-              point->in=current_income;
-              point->ex=current_expense;
-              fclose(aaa);
-              save_record(point);
-              aaa= fopen("Record.bin" , "rb");               
               }
 
             else if((search(INcategories , cat_name)) == false) printf("Category does not exist! Please try again...\n\n");  //*else return to the main menu
             break;
 
-            case 2:
+            case 2:     //* Add new expense record
             system("cls");
             printf("************ ADD EXPENSE ************\n\n");   //* starting the add expense function 
             printf("Enter the date(day, month, year)\n");
@@ -327,7 +290,7 @@ int main(){
 
             } 
             printf("Please choose a category: \n");
-            DisplayCategories(2);                //*printing the available expense categories
+            DisplayCategories(2 , eee);                //*printing the available expense categories
             scanf("%s" , cat_name);   //* scaning the users coice into a temporary array
             system("cls");
              if((search(EXcategories , cat_name)) == true){    //*checking if the desired category is avaialbe
@@ -335,51 +298,40 @@ int main(){
               printf("Category exist! saving your data...\n");   //* if so, start saving the data
               current_expense += amount;
               create(d, amount, add.currency, cat_name ,&expense);
-              fclose(ccc);
-              save_expense(expense);
+              save_expense(expense , ccc);
               ccc = fopen("Expense_record.bin" , "rb");
-              point = (struct record*)malloc(sizeof(struct record));
-              point->in=current_income;
-              point->ex=current_expense;
-              fclose(aaa);
-              save_record(point);
-              aaa = fopen("Record.bin" , "rb");           
               }
 
             else if((search(EXcategories , cat_name)) == false) printf("Category does not exist! Please try again...\n\n"); //*else return to the main menu
             break;
 
-            case 3:
+            case 3:   //* Add new category
             system("cls");
             printf("************ ADD NEW CATEGORY ************\n\n");
             printf("Please choose category type: \n1. Income Category \n2. Expense Category\n");
             scanf("%d" , &cat_type);
-            if(cat_type == 1 ){
-                fclose(ddd);
-                New_Category(1);
+            if(cat_type == 1 ){   //* New income category
+                New_Category(1);      
                 CreateCatList(name,&INcategories);
-                Save_INCOME_Category(INcategories);
+                Save_INCOME_Category(INcategories , ddd);
                 ddd = fopen("Income_categories.bin","rb");
             }
-            else if(cat_type == 2 ){
-              fclose(eee);
+            else if(cat_type == 2 ){   //* New expense category
                 New_Category(2);
                 CreateCatList(name,&EXcategories);
-                Save_EXPENSE_Category(EXcategories);
-                eee =fopen("Expense_categories.bin","rb");
+                Save_EXPENSE_Category(EXcategories , eee);
+                eee = fopen("Expense_categories.bin","rb");
                 }
             break;
 
             case 4:
-            system("cls");
-            fclose(bbb);
-            display_record(4);  
+            system("cls");                     //* Display the income record
+            display_record(4 , bbb);  
             break;
 
-            case 5:
+            case 5:           //* Display the expense record
             system("cls");
-            fclose(ccc);
-            display_record(5);   
+            display_record(5 , ccc);   
             break;
 
             case 6:
@@ -391,50 +343,34 @@ int main(){
             scanf("%s %s %s", day, month , year );
             system("cls");
             break;
-
-            case 11:
-            deleteLista(&income);
+ 
+            case 7:            //* Display the income categories
+            system("cls");          
+            DisplayCategories(1 , ddd);
             break;
 
-            case 7:
+            case 8:    //* Display the expense categories
             system("cls");
-            printf("************ INCOME CATEGORIES ************\n");
-            fclose(ddd);
-            DisplayCategories(1);
+            DisplayCategories(2 , eee);
             break;
 
-            case 8:
-            system("cls");
-            printf("************ EXPENSE CATEGORIES ************\n");
-            fclose(eee);
-            DisplayCategories(2);
-            break;
-
-            case 9:
+            case 9:                                  //*When closing the program - saving the income and expense record, closing all the files and destroying the lists.
+            point = (struct record*)malloc(sizeof(struct record));
+            point->in=current_income;
+            point->ex=current_expense;
+            save_record(point , aaa);
             free(point);
-            deleteLista(&income);
-            deleteLista(&expense);
-            deleteListc(&INcategories);
-            deleteListc(&EXcategories);
-            deleteListc(&head);
-            deleteListc(&temp);
-            deleteListc(&first);
-
-            amount = 0;
-
-            free(income);
-            free(expense);
-            free(INcategories);
-            free(EXcategories);
-            free(head);
-            free(temp);
-            free(first);
-
-            fclose(aaa);
+           
             fclose(bbb);
             fclose(ccc);
             fclose(ddd);
             fclose(eee);
+
+            deleteLista(&income);
+            deleteLista(&expense);
+            deleteListc(&INcategories);
+            deleteListc(&EXcategories);
+
 
             break;
             default:
@@ -489,29 +425,31 @@ void deleterecord(struct node *ptr){
     }
   }
 
-struct node *readnext(struct node *ptr, FILE *fptr){
-    if(ptr == NULL){
-        ptr=(struct node *)malloc(sizeof(struct node));
-        fread(ptr,sizeof(struct node),1,fptr);
-        ptr->next = NULL;
+struct node *readnext(struct node *ptr,FILE *fptr){
+  if(ptr == NULL){
+    ptr=(struct node *)malloc(sizeof(struct node));
+    fread(ptr,sizeof(struct node),1,fptr);
+    ptr->next = NULL;
     }
-
-    else{
-        struct node *ptr1 = ptr;
-        struct node *ptr2 = (struct node*)malloc(sizeof(struct node));
-        while(ptr->next != NULL){
-            ptr1 = ptr1->next;
-        }
-        fread(ptr2,sizeof(struct node),1,fptr);
-        ptr1->next = ptr2;
-        ptr2-> next = NULL;
-    }
-    return ptr;
+  
+  else{
+    struct node *ptr1=ptr;
+    struct node *ptr2=(struct node *)malloc(sizeof(struct node));
+    while(ptr1->next != NULL){
+      ptr1 = ptr1->next;
+      }
+    
+    fread(ptr2,sizeof(struct node),1,fptr);
+    ptr1->next = ptr2;
+    ptr2->next = NULL;
+  }
+  
+  return ptr;
 }
 
-void save_income(struct node *ptr){
-    FILE *fptr;
-    fptr = fopen("income_record.bin" , "wb");
+void save_income(struct node *ptr , FILE *fptr){
+  fclose(fptr);
+  fptr = fopen("Income_record.bin" , "wb");
     if (fptr != NULL)
     {
         struct node *ptr1 = ptr;
@@ -535,7 +473,6 @@ void save_income(struct node *ptr){
         printf("CANNOT SAVE INCOME! PLEASE TRY AGAIN...\n");
         printf("_______________________________________________________________________\n\n");
     }
-
 }
 
 struct node *readincome(struct node *ptr, FILE *fptr){
@@ -558,10 +495,10 @@ struct node *readincome(struct node *ptr, FILE *fptr){
 return ptr;
 }
 
-void save_expense(struct node *ptr){
-    FILE* fptr;
-    fptr = fopen("Expense_record.bin" , "wb");
-    if (expense != NULL){
+void save_expense(struct node *ptr , FILE *fptr){
+  fclose(fptr);
+  fptr = fopen("Expense_record.bin" , "wb");
+    if (fptr != NULL){
         struct node *ptr1 = ptr;
         struct node *holdnext = NULL;
         while(ptr1 != NULL){
@@ -583,7 +520,6 @@ void save_expense(struct node *ptr){
         printf("CANNOT SAVE EXPENSE! PLEASE TRY AGAIN...\n");
         printf("_______________________________________________________________________\n\n");
     }
-
 }
 
 struct node *readexpense(struct node *ptr , FILE *fptr){
@@ -603,11 +539,10 @@ struct node *readexpense(struct node *ptr , FILE *fptr){
     return ptr;
 }
 
-void display_record(int n){
+void display_record(int n , FILE* fptr){
     if (n == 4){
-
-        if (fopen("Income_record.bin" ,"rb") == NULL){
-            printf("********** THERE ARE NO RECORDS **********\n");
+        if (fptr == NULL){
+            printf("********** THERE ARE NO INCOME RECORDS **********\n");
             printf("________________________________________________________________________________________________________________\n\n");
         }
     
@@ -623,8 +558,8 @@ void display_record(int n){
     }
 
     else if (n == 5){
-        if (fopen("Expense_record.bin" ,"rb") == NULL){
-            printf("********** THERE ARE NO RECORDS **********\n");
+        if (fptr == NULL){
+            printf("********** THERE ARE NO EXPENSE RECORDS **********\n");
             printf("________________________________________________________________________________________________________________\n\n");
         }
     
@@ -641,15 +576,14 @@ void display_record(int n){
     }
 }
 
-void save_record(struct record *point){
-    FILE *fptr;
-    fptr = fopen("Record.bin" , "wb");
+void save_record(struct record *point , FILE *fptr){
+  fclose(fptr);
+  fptr = fopen("Record.bin" , "wb");
     if(fptr != NULL){
         fseek(fptr,0,SEEK_END);
         fwrite(point,sizeof(struct record),1,fptr);
     }
     else printf("***** CANNOT OPEN FILE *****\n");
-
     fclose(fptr);
     fptr = NULL;
 }
@@ -742,8 +676,8 @@ void CreateCatList(char x[] ,struct category **temp) {
       }
   }
 
-void Save_INCOME_Category(struct category *ptr){
-  FILE *fptr;
+void Save_INCOME_Category(struct category *ptr , FILE *fptr){
+  fclose(fptr);
   fptr=fopen("Income_categories.bin","wb");    
   if(fptr!=NULL){
     struct category *ptr1=ptr;
@@ -766,6 +700,7 @@ void Save_INCOME_Category(struct category *ptr){
     printf("\nCANNOT SAVE CATEGORY..TRY AGAIN\n");
     printf("________________________________________________________________________________________________________________\n\n");
   }
+  
 }
 
 void DeleteInRecord(struct category *ptr){
@@ -798,10 +733,11 @@ struct category *Read_INCOME_Category(struct category *ptr , FILE *fptr){
 return ptr;
 }
 
-void Save_EXPENSE_Category(struct category *ptr){
-  FILE *fptr;
-  fptr=fopen("Expense_categories.bin","wb");    
+void Save_EXPENSE_Category(struct category *ptr , FILE *fptr){
+  fclose(fptr);
+  fptr = fopen("Expense_categories.bin","wb");    
   if(fptr!=NULL){
+    fflush(fptr);
     struct category *ptr1=ptr;
     struct category *holdnext=NULL;
     while(ptr1!=NULL){
@@ -822,6 +758,7 @@ void Save_EXPENSE_Category(struct category *ptr){
     printf("\nCANNOT SAVE CATEGORY..TRY AGAIN\n");
     printf("________________________________________________________________________________________________________________\n\n");
   }
+  
 }
 
 struct category *Read_EXPENSE_Category(struct category *ptr , FILE *fptr){
@@ -844,14 +781,14 @@ struct category *Read_EXPENSE_Category(struct category *ptr , FILE *fptr){
 return ptr;
 }
 
-void DisplayCategories(int n){
+void DisplayCategories(int n , FILE* fptr){
   if(n == 1){
-    if(fopen("Income_categories.bin","rb") == NULL){
-        printf("\n **********NO CATEGORIES AVAILABLE **********\n");
+    if(fptr == NULL){
+        printf(" **********NO CATEGORIES AVAILABLE **********\n");
         printf("________________________________________________________________________________________________________________\n\n\n");
         }
         else{ 
-        printf("________________________________________________________________________________________________________________\n");
+        printf("************ YOUR INCOME CATEGORIES ************\n\n");
             struct category *ptr2 = INcategories;
             while(ptr2 != NULL){
                 printf("\n%s" ,ptr2->catname);
@@ -862,12 +799,12 @@ void DisplayCategories(int n){
       }
 
   if(n == 2){
-    if(fopen("Expense_categories.bin","rb") == NULL){
-        printf("\n **********NO CATEGORIES AVAILABLE **********\n");
+    if(fptr == NULL){
+        printf(" **********NO CATEGORIES AVAILABLE **********\n");
         printf("________________________________________________________________________________________________________________\n\n\n");
         }
         else{ 
-        printf("________________________________________________________________________________________________________________\n");
+        printf("************ YOUR EXPENSE CATEGORIES ************\n\n");
             struct category *ptr2 = EXcategories;
             while(ptr2 != NULL){
                 printf("\n%s" ,ptr2->catname);
